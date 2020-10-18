@@ -33,8 +33,8 @@ try:
         bot.reply_to(message, 'Hello, what\'s up?')
 
     @bot.message_handler(commands=['leaderboard'])
-    def get_weekly_leaderboard(message):
-        """Получить лидеров берпи за неделю."""
+    def get_month_leaderboard(message):
+        """Получить лидеров берпи за текущий месяц."""
         date = datetime.datetime.now().date()
         cursor.execute("""
             select
