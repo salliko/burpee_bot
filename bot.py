@@ -36,7 +36,6 @@ try:
             formatted_list.append(f"{medal} {leader[0]} ({leader[1]})")
         return header_leaderboard + '\n'.join(formatted_list)
 
-
     def get_month_leaderboard(message):
         """Получить лидеров берпи за текущий месяц."""
         date = datetime.datetime.now().date()
@@ -69,19 +68,30 @@ try:
             bot.reply_to(message, 'Результат должен быть числом.')
 
     def get_my_data(message):
+        msg = bot.send_message(message.chat.id, f'{MY_DATA}: ', reply_markup=make_my_data_menu())
+        bot.register_next_step_handler(msg, process_step)
+
+    def make_start_menu():
+        markup = types.ReplyKeyboardMarkup()
+        itembtn1 = types.KeyboardButton(ADD_RESULT)
+        itembtn2 = types.KeyboardButton(MONTHLY_LEADERS)
+        itembtn3 = types.KeyboardButton(MY_DATA)
+        markup.add(itembtn1, itembtn2, itembtn3)
+        return markup
+
+    def make_my_data_menu():
         markup = types.ReplyKeyboardMarkup()
         item1 = types.KeyboardButton(DAY)
         item2 = types.KeyboardButton(WEEK)
         item3 = types.KeyboardButton(MONTH)
         item4 = types.KeyboardButton(BACK)
         markup.add(item1, item2, item3, item4)
-        msg = bot.send_message(message.chat.id, f'{MY_DATA}: ', reply_markup=markup)
-        bot.register_next_step_handler(msg, process_step)
-
+        return markup
 
     def process_step(msg):
         if msg.text == MONTHLY_LEADERS:
             get_month_leaderboard(msg)
+            bot.register_next_step_handler(msg, process_step)
         elif msg.text == MY_DATA:
             get_my_data(msg)
         elif msg.text == DAY:
@@ -91,20 +101,15 @@ try:
         elif msg.text == MONTH:
             pass
         elif msg.text == BACK:
-            send_welcome(msg)
+            bot.send_message(msg.chat.id, 'Menu:', reply_markup=make_start_menu())
+            bot.register_next_step_handler(msg, process_step)
         elif msg.text == ADD_RESULT:
             write_result(msg)
 
 
     @bot.message_handler(commands=['start'])
     def send_welcome(message):
-        markup = types.ReplyKeyboardMarkup()
-
-        itembtn1 = types.KeyboardButton(ADD_RESULT)
-        itembtn2 = types.KeyboardButton(MONTHLY_LEADERS)
-        itembtn3 = types.KeyboardButton(MY_DATA)
-        markup.add(itembtn1, itembtn2, itembtn3)
-        msg = bot.send_message(message.chat.id, 'Menu:', reply_markup=markup)
+        msg = bot.send_message(message.chat.id, 'Menu:', reply_markup=make_start_menu())
         bot.register_next_step_handler(msg, process_step)
 
 
